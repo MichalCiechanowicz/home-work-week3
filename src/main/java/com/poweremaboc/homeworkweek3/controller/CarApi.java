@@ -1,14 +1,12 @@
 package com.poweremaboc.homeworkweek3.controller;
 
 import com.poweremaboc.homeworkweek3.model.Car;
+import com.poweremaboc.homeworkweek3.service.CarService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 //Zadanie podstawowe:
 //        Napisz REST API dla listy pojazdów. Pojazd będzie miał pola: id, mark, model, color.
@@ -27,59 +25,49 @@ import java.util.stream.Collectors;
 @RequestMapping("/cars")
 public class CarApi {
 
-    private List<Car> carList;
+    private CarService carService;
 
     public CarApi() {
-        this.carList = new ArrayList<>();
-        carList.add(new Car(1L, "Audi", "A3", "Silver"));
-        carList.add(new Car(2L, "VW", "Jetta", "Red"));
-        carList.add(new Car(3L, "Bmw", "i3", "Black"));
+        carService = new CarService();
     }
 
     @GetMapping
     public ResponseEntity<List<Car>> getCars() {
-        if (!carList.isEmpty()) {
-            return new ResponseEntity<>(carList, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        return new ResponseEntity<>(carService.getCarList(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Car> getCarById(@PathVariable long id) {
-        Optional<Car> first = carList.stream().filter(car -> car.getId() == id).findFirst();
-        if (first.isPresent()) {
-            return new ResponseEntity<>(first.get(), HttpStatus.OK);
+        Car carById = carService.getCarById(id);
+        if (carById != null) {
+            return new ResponseEntity<>(carById, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @GetMapping("/colors")
     public ResponseEntity<List<Car>> getCarByColor(@RequestParam String color) {
-        List<Car> collect = carList.stream().filter(car -> car.getColor().equals(color)).collect(Collectors.toList());
-        if (!collect.isEmpty()) {
-            return new ResponseEntity<>(collect, HttpStatus.OK);
+        List<Car> carByColor = carService.getCarByColor(color);
+        if (!carByColor.isEmpty()) {
+            return new ResponseEntity<>(carByColor, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @PostMapping
     public ResponseEntity<Car> addCar(@RequestBody Car newCar) {
-        Optional<Car> first = carList.stream().filter(car -> car.getId() == newCar.getId()).findFirst();
-        if (!first.isPresent()) {
-            boolean add = carList.add(newCar);
-            if (add) {
-                return new ResponseEntity<>(HttpStatus.CREATED);
-            }
+        boolean add = carService.addCar(newCar);
+        if (add) {
+            return new ResponseEntity<>(HttpStatus.CREATED);
         }
         return new ResponseEntity<>(HttpStatus.CONFLICT);
     }
 
     @PutMapping
     public ResponseEntity<Car> modifyRecord(@RequestBody Car modCar) {
-        Optional<Car> first = carList.stream().filter(car -> car.getId() == modCar.getId()).findFirst();
-        if (first.isPresent()) {
-            carList.remove(first.get());
-            carList.add(modCar);
+        boolean mod = carService.modifyRecord(modCar);
+        if (mod) {
             return new ResponseEntity<>(HttpStatus.CREATED);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -87,15 +75,14 @@ public class CarApi {
 
     @PatchMapping("/{id}")
     public ResponseEntity<Car> modifyByColor(@PathVariable long id, @RequestHeader String color) {
-        Optional<Car> first = carList.stream().filter(car -> car.getId() == id).findFirst();
-        if (first.isPresent()) {
-            first.get().setColor(color);
+        boolean modifyByColor = carService.modifyByColor(id, color);
+        if (modifyByColor) {
             return new ResponseEntity<>(HttpStatus.CREATED);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    //    @PatchMapping("/{id}/color")
+    //    @PatchMapping("/{id}/model")
 //    public ResponseEntity<Car> modifyByModel(@PathVariable long id, @RequestParam String model) {
 //        Optional<Car> first = carList.stream().filter(car -> car.getId() == id).findFirst();
 //        if (first.isPresent()) {
@@ -106,12 +93,9 @@ public class CarApi {
 //    }
     @DeleteMapping("/{id}")
     public ResponseEntity<Car> removeById(@PathVariable long id) {
-        Optional<Car> first = carList.stream().filter(car -> car.getId() == id).findFirst();
-        if (first.isPresent()) {
-            boolean remove = carList.remove(first.get());
-            if (remove) {
-                return new ResponseEntity<>(first.get(), HttpStatus.OK);
-            }
+        boolean removed = carService.deleteRecord(id);
+        if (removed) {
+            return new ResponseEntity<>(carService.getCarById(id), HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
