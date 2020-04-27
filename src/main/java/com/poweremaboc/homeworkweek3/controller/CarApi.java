@@ -3,23 +3,11 @@ package com.poweremaboc.homeworkweek3.controller;
 import com.poweremaboc.homeworkweek3.model.Car;
 import com.poweremaboc.homeworkweek3.service.CarService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-//Zadanie podstawowe:
-//        Napisz REST API dla listy pojazdów. Pojazd będzie miał pola: id, mark, model, color.
-//        API które będzie obsługiwało metody webowe:
-//
-//        do pobierania wszystkich pozycji
-//        do pobierania elementu po jego id
-//        do pobierania elementów w określonym kolorze (query)
-//        do dodawania pozycji
-//        do modyfikowania pozycji
-//        do modyfikowania jednego z pól pozycji
-//        do usuwania jeden pozycji
-//        Przy starcie aplikacji mają dodawać się 3 pozycje.
 
 @RestController
 @RequestMapping("/cars")
@@ -31,13 +19,13 @@ public class CarApi {
         carService = new CarService();
     }
 
-    @GetMapping
+    @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<List<Car>> getCars() {
 
         return new ResponseEntity<>(carService.getCarList(), HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(path = "/{id}",produces = {MediaType.APPLICATION_JSON_VALUE,MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Car> getCarById(@PathVariable long id) {
         Car carById = carService.getCarById(id);
         if (carById != null) {
@@ -46,7 +34,7 @@ public class CarApi {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @GetMapping("/colors")
+    @GetMapping(params = "/colors", produces = {MediaType.APPLICATION_JSON_VALUE,MediaType.APPLICATION_XML_VALUE} )
     public ResponseEntity<List<Car>> getCarByColor(@RequestParam String color) {
         List<Car> carByColor = carService.getCarByColor(color);
         if (!carByColor.isEmpty()) {
@@ -55,7 +43,7 @@ public class CarApi {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping
+    @PostMapping(produces = {MediaType.APPLICATION_JSON_VALUE,MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Car> addCar(@RequestBody Car newCar) {
         boolean add = carService.addCar(newCar);
         if (add) {
@@ -64,7 +52,7 @@ public class CarApi {
         return new ResponseEntity<>(HttpStatus.CONFLICT);
     }
 
-    @PutMapping
+    @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE,MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Car> modifyRecord(@RequestBody Car modCar) {
         boolean mod = carService.modifyRecord(modCar);
         if (mod) {
@@ -73,7 +61,7 @@ public class CarApi {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping(path = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE,MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Car> modifyByColor(@PathVariable long id, @RequestHeader String color) {
         boolean modifyByColor = carService.modifyByColor(id, color);
         if (modifyByColor) {
@@ -91,7 +79,7 @@ public class CarApi {
 //        }
 //        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 //    }
-    @DeleteMapping("/{id}")
+    @DeleteMapping(path = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE,MediaType.APPLICATION_XML_VALUE})
     public ResponseEntity<Car> removeById(@PathVariable long id) {
         boolean removed = carService.deleteRecord(id);
         if (removed) {
