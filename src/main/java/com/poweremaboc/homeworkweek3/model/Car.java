@@ -1,10 +1,21 @@
 package com.poweremaboc.homeworkweek3.model;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 public class Car {
 
+    @NotNull
     private long id;
+
+    @Size(min = 2, max = 15)
     private String make;
+
+    @Size(min = 2, max = 15)
     private String model;
+
+    @Size(min = 2, max = 15)
     private String color;
 
     public Car() {
